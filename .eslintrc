@@ -5,6 +5,7 @@
     "plugin:@shopify/prettier"
   ],
   "rules": {
+    "import/extensions": ["error", "ignorePackages"],
     "node/no-unsupported-features/node-builtins": [
       "error",
       {

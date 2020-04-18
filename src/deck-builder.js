@@ -8,7 +8,7 @@ import {
   RESPONSE_TEXT_COLOR,
   generateCard,
   generateCardText,
-} from "./cards";
+} from "./cards.js";
 
 const build = (inputFile, writeDir, cardType, yStart = 20, lineHeight = 18) => {
   const rl = readline.createInterface({

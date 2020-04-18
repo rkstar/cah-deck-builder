@@ -1,9 +1,9 @@
-const fs = require("fs");
-const stream = require("stream");
+import fs from "fs";
+import stream from "stream";
 
-const csv = require("csv-parser");
+import csv from "csv-parser";
 
-const availableSets = (inputFile) => {
+export const availableSets = (inputFile) => {
   return new Promise((resolve) => {
     const sets = new Set();
     fs.createReadStream(inputFile)
@@ -16,7 +16,7 @@ const availableSets = (inputFile) => {
   });
 };
 
-const readLines = (input) => {
+export const readLines = (input) => {
   const output = new stream.PassThrough({objectMode: true});
   input.pipe(csv()).on("data", (data) => {
     output.write(data);
@@ -25,11 +25,6 @@ const readLines = (input) => {
   return output;
 };
 
-const getCountry = (line) => {
+export const getCountry = (line) => {
   const fields = line.split(",");
-};
-
-module.exports = {
-  availableSets,
-  readLines,
 };

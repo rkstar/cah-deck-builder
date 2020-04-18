@@ -1,10 +1,12 @@
 import path from "path";
+import {fileURLToPath} from "url";
 
 import inquirer from "inquirer";
 
-const {generateSourceFiles, mergeSourceFiles} = require("./src/csv-generator");
-const availableSets = require("./src/utils").availableSets;
+import {generateSourceFiles, mergeSourceFiles} from "./src/csv-generator.js";
+import {availableSets} from "./src/utils.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const promptsFile = path.resolve(__dirname, "./assets/prompts-all-sets.csv");
 const responsesFile = path.resolve(
   __dirname,
