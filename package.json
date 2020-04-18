@@ -1,0 +1,31 @@
+{
+  "name": "cah-deck-builder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "run": "node ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkstar/cah-deck-builder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rkstar/cah-deck-builder/issues"
+  },
+  "homepage": "https://github.com/rkstar/cah-deck-builder#readme",
+  "dependencies": {
+    "csv-parser": "^2.3.2",
+    "inquirer": "^7.1.0",
+    "string-similarity": "^4.0.1"
+  },
+  "devDependencies": {
+    "@shopify/eslint-plugin": "^36.0.2",
+    "eslint": "^6.8.0",
+    "prettier": "^2.0.4"
+  }
+}

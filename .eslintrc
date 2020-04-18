@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "plugin:@shopify/node",
+    "plugin:@shopify/esnext",
+    "plugin:@shopify/prettier"
+  ],
+  "rules": {
+    "node/no-unsupported-features/node-builtins": [
+      "error",
+      {
+        "version": ">=13.0.0",
+        "ignores": []
+      }
+    ]
+  }
+}
