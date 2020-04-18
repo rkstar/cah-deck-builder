@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
 
@@ -26,6 +27,9 @@ async function main() {
   ]);
 
   if (refreshSourceFiles) {
+    if (!fs.existsSync(sourceDir)) {
+      fs.mkdirSync(sourceDir);
+    }
     console.log("starting to write master list...");
     const prompts = await generateSourceFiles("prompt", promptsFile, sourceDir);
     const responses = await generateSourceFiles(
