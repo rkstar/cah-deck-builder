@@ -1,30 +1,17 @@
 import fs from "fs";
-import stream from "stream";
-
-import csv from "csv-parser";
+import readline from "readline";
 
 export const availableSets = (inputFile) => {
   return new Promise((resolve) => {
-    const sets = new Set();
-    fs.createReadStream(inputFile)
-      .pipe(csv())
-      .on("data", (raw) => {
-        const [, set] = Object.values(raw);
-        sets.add(set.replace(/^\s/, ""));
-      })
-      .on("end", () => resolve([...sets].sort()));
+    const setNames = [];
+    const rl = readline.createInterface({
+      input: fs.createReadStream(inputFile),
+    });
+    rl.on("line", (line) => setNames.push(line));
+    rl.on("close", () => resolve(setNames));
   });
 };
 
-export const readLines = (input) => {
-  const output = new stream.PassThrough({objectMode: true});
-  input.pipe(csv()).on("data", (data) => {
-    output.write(data);
-  });
-
-  return output;
-};
-
-export const getCountry = (line) => {
-  const fields = line.split(",");
+export const generateAvailableSets = (setNames, writeFile) => {
+  fs.appendFileSync(writeFile, setNames.join("\n"));
 };

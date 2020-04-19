@@ -4,10 +4,16 @@ import {fileURLToPath} from "url";
 
 import inquirer from "inquirer";
 
-import {generateSourceFiles, mergeSourceFiles} from "./src/csv-generator.js";
-import {availableSets} from "./src/utils.js";
+import {
+  generateSourceFiles,
+  makeRegionalBaseSets,
+  mergeSourceFiles,
+} from "./src/csv-generator.js";
+import {availableSets, generateAvailableSets} from "./src/utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const setNamesFile = path.resolve(__dirname, "./assets/available-sets.csv");
+const baseSetFile = path.resolve(__dirname, "./assets/all-base-sets.csv");
 const promptsFile = path.resolve(__dirname, "./assets/prompts-all-sets.csv");
 const responsesFile = path.resolve(
   __dirname,
@@ -31,43 +37,61 @@ async function main() {
       fs.mkdirSync(sourceDir);
     }
     console.log("starting to write master list...");
-    const prompts = await generateSourceFiles("prompt", promptsFile, sourceDir);
-    const responses = await generateSourceFiles(
-      "response",
-      responsesFile,
+    const expansionSetNames = await generateSourceFiles(
+      "prompt",
+      promptsFile,
       sourceDir
     );
-    console.log("master list completed.");
+    console.log("prompts written.");
+    await generateSourceFiles("response", responsesFile, sourceDir);
+    console.log("responses written.");
+    const regionalBaseSetNames = await makeRegionalBaseSets(
+      baseSetFile,
+      sourceDir
+    );
+    console.log("regional base sets written");
+
+    expansionSetNames.sort();
+    regionalBaseSetNames.sort();
+    generateAvailableSets(
+      [...regionalBaseSetNames, ...expansionSetNames],
+      setNamesFile
+    );
+    console.log("available set names written.");
   }
 
-  // const {writeNewFiles} = await inquirer.prompt([
-  //   {
-  //     type: 'confirm',
-  //     name: 'writeNewFiles',
-  //     message: 'Do you wish to create a playing deck now?',
-  //     choices: ['yes', 'no'],
-  //   }
-  // ])
+  const {writeNewFiles} = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "writeNewFiles",
+      message: "Do you wish to create a playing deck now?",
+      choices: ["yes", "no"],
+    },
+  ]);
 
-  // const {selectedSets} = await inquirer.prompt([
-  //   {
-  //     type: 'checkbox',
-  //     name: 'selectedSets',
-  //     message: 'Which set(s) would you like to play with today?',
-  //     choices: async () => await availableSets(promptsFile),
-  //   }
-  // ])
+  if (!writeNewFiles) {
+    process.exit(0);
+  }
 
-  // const {writeDir} = await inquirer.prompt([
-  //   {
-  //     type: 'input',
-  //     name: 'writeDir',
-  //     message: 'Where would you like the prompt/response csv files written?',
-  //     default: './',
-  //   }
-  // ])
+  const {selectedSets} = await inquirer.prompt([
+    {
+      type: "checkbox",
+      name: "selectedSets",
+      message: "Which set(s) would you like to play with today?",
+      choices: () => availableSets(setNamesFile),
+    },
+  ]);
 
-  // mergeSourceFiles(selectedSets, sourceDir, path.resolve(__dirname, writeDir))
+  const {writeDir} = await inquirer.prompt([
+    {
+      type: "input",
+      name: "writeDir",
+      message: "Where would you like the prompt/response csv files written?",
+      default: "./",
+    },
+  ]);
+
+  mergeSourceFiles(selectedSets, sourceDir, path.resolve(__dirname, writeDir));
 }
 
 main();

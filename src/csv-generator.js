@@ -17,39 +17,96 @@ const processSourceData = (cardType, text, set, writeDir) => ({
   header: `Label,${cardType}\n`,
 });
 const rmnl = (str, repl = "") => str.replace(/\n/g, repl);
+const ignoreBaseSet = (set) => set === "cah-base-set";
 
 // read in the file and write out files
 // for each set
 export function generateSourceFiles(cardType, inputFile, writeDir) {
   const openFiles = [];
-  fs.createReadStream(inputFile)
-    .pipe(csv())
-    .on("data", (raw) => {
-      const [text, set] = Object.values(raw);
-      const {displaySet, safeSet, safeText, header} = processSourceData(
-        cardType,
-        text,
-        set,
-        writeDir
-      );
-      const writeFile = `${writeDir}/${safeSet}-${cardType}.csv`;
-      // 2. check to see if filename is in openFiles,
-      //    if not, write the header [Label, <cardType>]
-      //    and add it to openFiles
-      if (!openFiles.includes(writeFile)) {
-        fs.writeFileSync(writeFile, header);
-        openFiles.push(writeFile);
-      }
-
-      // only keep text strings that start with a capital letter
-      const rx = RegExp(/^[A-Z]/);
-      if (rx.test(safeText)) {
-        fs.appendFileSync(
-          writeFile,
-          `${rmnl(displaySet)},${rmnl(safeText, " ")}\n`
+  const setNames = new Set();
+  return new Promise((resolve) => {
+    fs.createReadStream(inputFile)
+      .pipe(csv())
+      .on("data", (raw) => {
+        const [text, set] = Object.values(raw);
+        const {displaySet, safeSet, safeText, header} = processSourceData(
+          cardType,
+          text,
+          set,
+          writeDir
         );
-      }
-    });
+        if (!safeSet || ignoreBaseSet(safeSet)) return;
+        setNames.add(set);
+        const writeFile = `${writeDir}/${safeSet}-${cardType}.csv`;
+        // 2. check to see if filename is in openFiles,
+        //    if not, write the header [Label, <cardType>]
+        //    and add it to openFiles
+        if (!openFiles.includes(writeFile)) {
+          fs.writeFileSync(writeFile, header);
+          openFiles.push(writeFile);
+        }
+
+        // only keep text strings that start with a capital letter
+        const rx = RegExp(/^[A-Z]/);
+        if (rx.test(safeText)) {
+          fs.appendFileSync(
+            writeFile,
+            `${rmnl(displaySet)},${rmnl(safeText, " ")}\n`
+          );
+        }
+      })
+      .on("end", () => resolve(Array.from(setNames)));
+  });
+}
+
+export function makeRegionalBaseSets(inputFile, writeDir) {
+  const openFiles = [];
+  const setNames = new Set();
+  return new Promise((resolve) => {
+    fs.createReadStream(inputFile)
+      .pipe(csv())
+      .on("headers", (headers) => {
+        // console.log(headers);
+      })
+      .on("data", ({Text: text, US, UK, AU, CA, INTL, ...rest}) => {
+        // not really sure WHY all this fuckery is required...
+        const [type] = Object.keys(rest);
+        const cardType = rest[type].toLowerCase();
+        const set = "CAH Base Set";
+        const regions = INTL
+          ? ["US", "UK", "AU", "CA"]
+          : [US && "US", UK && "UK", AU && "AU", CA && "CA"].filter((el) =>
+              Boolean(el)
+            );
+        const {displaySet, safeSet, safeText, header} = processSourceData(
+          cardType,
+          text,
+          set,
+          writeDir
+        );
+        regions.forEach((region) => {
+          setNames.add(`${set} (${region})`);
+          const writeFile = `${writeDir}/${safeSet}-${region}--${cardType}.csv`;
+          // 2. check to see if filename is in openFiles,
+          //    if not, write the header [Label, <cardType>]
+          //    and add it to openFiles
+          if (!openFiles.includes(writeFile)) {
+            fs.writeFileSync(writeFile, header);
+            openFiles.push(writeFile);
+          }
+
+          // only keep text strings that start with a capital letter
+          const rx = RegExp(/^[A-Z]/);
+          if (rx.test(safeText)) {
+            fs.appendFileSync(
+              writeFile,
+              `${rmnl(displaySet)} (${region}),${rmnl(safeText, " ")}\n`
+            );
+          }
+        });
+      })
+      .on("end", () => resolve(Array.from(setNames)));
+  });
 }
 
 export function mergeSourceFiles(sets, sourceDir, writeDir) {
@@ -60,11 +117,11 @@ export function mergeSourceFiles(sets, sourceDir, writeDir) {
     fs.createReadStream(promptFile)
       .pipe(csv())
       .on("data", (raw) => {
-        const [set, text] = Object.values(raw);
+        const [promptSet, text] = Object.values(raw);
         const {writeFile, displaySet, safeText, header} = processSourceData(
           "prompt",
           text,
-          set,
+          promptSet,
           writeDir
         );
 
@@ -87,11 +144,11 @@ export function mergeSourceFiles(sets, sourceDir, writeDir) {
     fs.createReadStream(responseFile)
       .pipe(csv())
       .on("data", (raw) => {
-        const [set, text] = Object.values(raw);
+        const [responseSet, text] = Object.values(raw);
         const {writeFile, displaySet, safeText, header} = processSourceData(
           "response",
           text,
-          set,
+          responseSet,
           writeDir
         );
 
