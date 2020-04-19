@@ -21,8 +21,7 @@
   "homepage": "https://github.com/rkstar/cah-deck-builder#readme",
   "dependencies": {
     "csv-parser": "^2.3.2",
-    "inquirer": "^7.1.0",
-    "string-similarity": "^4.0.1"
+    "inquirer": "^7.1.0"
   },
   "devDependencies": {
     "@shopify/eslint-plugin": "^36.0.2",
