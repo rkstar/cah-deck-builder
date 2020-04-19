@@ -36,7 +36,7 @@ export function generateSourceFiles(cardType, inputFile, writeDir) {
           writeDir
         );
         if (!safeSet || ignoreBaseSet(safeSet)) return;
-        setNames.add(set);
+        setNames.add(displaySet);
         const writeFile = `${writeDir}/${safeSet}-${cardType}.csv`;
         // 2. check to see if filename is in openFiles,
         //    if not, write the header [Label, <cardType>]
@@ -85,7 +85,7 @@ export function makeRegionalBaseSets(inputFile, writeDir) {
           writeDir
         );
         regions.forEach((region) => {
-          setNames.add(`${set} (${region})`);
+          setNames.add(`${displaySet} (${region})`);
           const writeFile = `${writeDir}/${safeSet}-${region}--${cardType}.csv`;
           // 2. check to see if filename is in openFiles,
           //    if not, write the header [Label, <cardType>]

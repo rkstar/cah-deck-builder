@@ -13,5 +13,5 @@ export const availableSets = (inputFile) => {
 };
 
 export const generateAvailableSets = (setNames, writeFile) => {
-  fs.appendFileSync(writeFile, setNames.join("\n"));
+  fs.writeFileSync(writeFile, setNames.join("\n"));
 };
