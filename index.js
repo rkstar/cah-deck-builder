@@ -91,7 +91,9 @@ async function main() {
     },
   ]);
 
-  mergeSourceFiles(selectedSets, sourceDir, path.resolve(__dirname, writeDir));
+  // check to see if we have an absolute path or not
+  const doNotResolve = RegExp(/^(?:\/|~)/).test(writeDir)
+  mergeSourceFiles(selectedSets, sourceDir, doNotResolve ? writeDir : path.resolve(__dirname, writeDir));
 }
 
 main();
